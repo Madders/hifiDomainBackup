@@ -66,10 +66,26 @@ namespace hifiDomainBackup
 
             foreach(AssetLink assetLink in assetLinks)
             {
-                Console.WriteLine(assetLink.DownloadPath);
+                assetLink.RelativePath = GetFileNameFromUrl(assetLink.DownloadPath);
+                //Console.WriteLine(assetLink.DownloadPath);
+                //Console.WriteLine(assetLink.RelativePath);
+
+                string localPath = destinationFilePath + assetLink.RelativePath;
+
+                DownloadFileIfNotExists(assetLink.DownloadPath, localPath);
             }
 
             Console.WriteLine("Done");
+        }
+
+        static void DownloadFileIfNotExists(string url, string localPath)
+        {
+                if(!File.Exists(localPath)){
+                    Directory.CreateDirectory(Path.GetPathRoot(localPath)); 
+                    Console.WriteLine("Downloading {0}", url);
+                    using (var wc = new System.Net.WebClient())
+    		            wc.DownloadFile(url, localPath);
+                }
         }
 
         static void ParseAssetLinks(string json, string pattern, List<AssetLink> assetLinks)
@@ -85,12 +101,20 @@ namespace hifiDomainBackup
                 }
             }
         }
+
+        static string GetFileNameFromUrl(string url)
+        {
+            Uri uri;
+            Uri.TryCreate(url, UriKind.Absolute, out uri);
+
+            return Path.GetFileName(uri.LocalPath);
+        }
     }
 
     public class AssetLink
     {
         public string MatchString { get; set; }
         public string DownloadPath { get; set; }
-        public string LocalPath { get; set; }
+        public string RelativePath { get; set; }
     }
 }
