@@ -11,8 +11,8 @@ namespace hifiDomainBackup
     class Program
     {
         static string backupFilePath = "/home/madders/backup-madders-place-20200831-2020-08-31_15-24-09.content.zip";
-        static string destinationFilePath = "/home/madders/worlds/madders-place";
-        static string destinationHostingRoot = "https://files.tivolicloud.com/madders/MaddersPlace/";
+        static string destinationFilePath = "/home/madders/worlds/madders-place/hifiassets/";
+        static string destinationHostingRoot = "https://files.tivolicloud.com/madders/MaddersPlace/HiFiAssets/";
 
 
         static void Main(string[] args)
@@ -56,26 +56,33 @@ namespace hifiDomainBackup
 
             List<AssetLink> assetLinks = new List<AssetLink>();
 
-            ParseAssetLinks(modelsJson, "", assetLinks);
+            ParseAssetLinks(modelsJson, "\\\\\"(http://hifi-content.s3.amazonaws.com.*?)\\\\\"", assetLinks);
+            ParseAssetLinks(modelsJson, "\\\\\"(http://content.highfidelity.com.*?)\\\\\"", assetLinks);
 
-            // "modelURL": "https://files.tivolicloud.com/madders/MaddersPlace/FBXObjects/SM_Bld_Floor_Carpet_01.fbx"
-            // "script": "http://hifi-content.s3.amazonaws.com/caitlyn/production/soundEmitter/soundLoopEmitter.js"
-            // "userData": "{\"soundURL\":\"http://hifi-content.s3.amazonaws.com/alan/dev/Audio/ambient-sirens.wav\",\"soundVolume\":0.45,\"refreshInterval\":100}",
-// "ambientURL": "http://hifi-content.s3.amazonaws.com/DomainContent/baked/dystopia/SKYJimJamz.ktx"
-//"url": "http://hifi-content.s3.amazonaws.com/DomainContent/baked/dystopia/SKYJimJamz.ktx"
-//"modelURL": "http://content.highfidelity.com/baked/jimjamz/air-traffic-loop/baked/air-traffic-loop.baked.fbx?1",
+            ParseAssetLinks(modelsJson, "\"(http://hifi-content.s3.amazonaws.com.*?)\"", assetLinks);
+            ParseAssetLinks(modelsJson, "\"(http://content.highfidelity.com.*?)\"", assetLinks);
 
-            Console.WriteLine(assetLinks.Count);
+            Console.WriteLine("{0} HiFi Assets found to download and replace.", assetLinks.Count);
+
+            foreach(AssetLink assetLink in assetLinks)
+            {
+                Console.WriteLine(assetLink.DownloadPath);
+            }
 
             Console.WriteLine("Done");
         }
 
         static void ParseAssetLinks(string json, string pattern, List<AssetLink> assetLinks)
         {
-            foreach(var match in Regex.Matches(json, pattern))
+            foreach(Match match in Regex.Matches(json, pattern))
             {
-                Console.WriteLine(match.ToString());
-                //if(assetLinks.Con)
+                if(!match.Groups[1].ToString().EndsWith("\\") && !assetLinks.Exists(al => al.MatchString == match.ToString()))
+                {
+                    assetLinks.Add(new AssetLink{
+                        MatchString = match.ToString(),
+                        DownloadPath = match.Groups[1].ToString()
+                    });
+                }
             }
         }
     }
