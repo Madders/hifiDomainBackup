@@ -13,7 +13,7 @@ namespace hifiDomainBackup
     {
         static string backupFilePath = "/home/madders/backup-madders-place-20200831-2020-08-31_15-24-09.content.zip";
         static string destinationFilePath = "/home/madders/worlds/madders-place/hifiassets/";
-        static string destinationHostingRoot = "https://files.tivolicloud.com/madders/MaddersPlace/HiFiAssets/";
+        static string destinationHostingRoot = "https://files.tivolicloud.com/madders/MaddersPlace/hifiassets/";
         static bool includeOriginalServerAndPathInDestination = true;
  
         static void Main(string[] args)
@@ -110,7 +110,6 @@ namespace hifiDomainBackup
 
                 if(node.Identifier.Value == "RelativeFilename")
                 {
-                    //Console.WriteLine("--" + ((UkooLabs.FbxSharpie.Tokens.StringToken)node.Value).Value.ToString());
                     DownloadFileIfNotExists(
                         downloadRoot + ((UkooLabs.FbxSharpie.Tokens.StringToken)node.Value).Value.ToString(), 
                         destinationRoot + '/' + ((UkooLabs.FbxSharpie.Tokens.StringToken)node.Value).Value.ToString());
