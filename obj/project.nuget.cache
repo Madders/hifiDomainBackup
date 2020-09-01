@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "rw203vMyh0ru+Qt1hQ2hWJL+xvI+NjYkqx5I07gsL4g3DRN9HqM4khQShSGrRnmiW0T0Om52uCSERghFoQHrLw==",
+  "dgSpecHash": "h+D8JQHtutYAX4UkXyb81sp/AB4DO6pqfGZkq8aNtBVTax+tvvjsFgNp+6VIfe8Yek8Mhkfq5KJAYCP7gvFiVQ==",
   "success": true,
   "projectFilePath": "/home/madders/source/hifiDomainBackup/hifiDomainBackup.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/madders/.nuget/packages/system.numerics.vectors/4.5.0/system.numerics.vectors.4.5.0.nupkg.sha512",
+    "/home/madders/.nuget/packages/ukoolabs.fbxsharpie/1.0.99/ukoolabs.fbxsharpie.1.0.99.nupkg.sha512"
+  ],
   "logs": []
 }

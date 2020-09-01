@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Linq;
+using UkooLabs.FbxSharpie;
 
 namespace hifiDomainBackup
 {
@@ -13,8 +14,8 @@ namespace hifiDomainBackup
         static string backupFilePath = "/home/madders/backup-madders-place-20200831-2020-08-31_15-24-09.content.zip";
         static string destinationFilePath = "/home/madders/worlds/madders-place/hifiassets/";
         static string destinationHostingRoot = "https://files.tivolicloud.com/madders/MaddersPlace/HiFiAssets/";
-
-
+        static bool includeOriginalServerAndPathInDestination = true;
+ 
         static void Main(string[] args)
         {
             string modelsJson = string.Empty;
@@ -66,22 +67,65 @@ namespace hifiDomainBackup
 
             foreach(AssetLink assetLink in assetLinks)
             {
-                assetLink.RelativePath = GetFileNameFromUrl(assetLink.DownloadPath);
-                //Console.WriteLine(assetLink.DownloadPath);
-                //Console.WriteLine(assetLink.RelativePath);
-
+                if(includeOriginalServerAndPathInDestination)
+                {
+                    Uri uri = new Uri(GetPathFromUrl(assetLink.DownloadPath));
+                    assetLink.RelativePath = uri.Host + uri.LocalPath;
+                    assetLink.RelativePath += GetFileNameFromUrl(assetLink.DownloadPath);
+                }
+                else
+                {
+                    assetLink.RelativePath = GetFileNameFromUrl(assetLink.DownloadPath);        
+                }
+                
                 string localPath = destinationFilePath + assetLink.RelativePath;
 
                 DownloadFileIfNotExists(assetLink.DownloadPath, localPath);
+
+                if(assetLink.RelativePath.EndsWith(".fbx", true, null))
+                {
+                    Console.WriteLine("{0}", assetLink.DownloadPath);
+                    ParseFbxTextures(localPath, GetPathFromUrl(assetLink.DownloadPath), Path.GetDirectoryName(localPath));
+                }
             }
 
             Console.WriteLine("Done");
         }
 
+        static void ParseFbxTextures(string path, string downloadRoot, string destinationRoot)
+        {
+            //var isBinary = FbxIO.IsBinaryFbx(path);
+            var documentNode = FbxIO.Read(path);
+
+            Console.WriteLine("Parsing fbx - {0}", path);
+
+            ParseNodes(documentNode.Nodes, downloadRoot, destinationRoot);
+        }
+
+        static void ParseNodes(FbxNode[] nodes, string downloadRoot, string destinationRoot)
+        {
+            foreach (var node in nodes)
+            {                
+                if(node == null) continue;
+
+                if(node.Identifier.Value == "RelativeFilename")
+                {
+                    //Console.WriteLine("--" + ((UkooLabs.FbxSharpie.Tokens.StringToken)node.Value).Value.ToString());
+                    DownloadFileIfNotExists(
+                        downloadRoot + ((UkooLabs.FbxSharpie.Tokens.StringToken)node.Value).Value.ToString(), 
+                        destinationRoot + '/' + ((UkooLabs.FbxSharpie.Tokens.StringToken)node.Value).Value.ToString());
+                }
+
+                if(node.Nodes != null){
+                    ParseNodes(node.Nodes, downloadRoot, destinationRoot);
+                }
+            }
+        }
+
         static void DownloadFileIfNotExists(string url, string localPath)
         {
                 if(!File.Exists(localPath)){
-                    Directory.CreateDirectory(Path.GetPathRoot(localPath)); 
+                    Directory.CreateDirectory(Path.GetDirectoryName(localPath)); 
                     Console.WriteLine("Downloading {0}", url);
                     using (var wc = new System.Net.WebClient())
     		            wc.DownloadFile(url, localPath);
@@ -108,6 +152,11 @@ namespace hifiDomainBackup
             Uri.TryCreate(url, UriKind.Absolute, out uri);
 
             return Path.GetFileName(uri.LocalPath);
+        }
+
+        static string GetPathFromUrl(string url)
+        {
+            return url.Substring(0, url.Length - url.Split('/').Last().Length);
         }
     }
 
