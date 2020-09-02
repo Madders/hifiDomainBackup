@@ -85,7 +85,14 @@ namespace hifiDomainBackup
                 if(assetLink.RelativePath.EndsWith(".fbx", true, null))
                 {
                     Console.WriteLine("{0}", assetLink.DownloadPath);
-                    ParseFbxTextures(localPath, GetPathFromUrl(assetLink.DownloadPath), Path.GetDirectoryName(localPath));
+                    try
+                    {
+                        ParseFbxTextures(localPath, GetPathFromUrl(assetLink.DownloadPath), Path.GetDirectoryName(localPath));
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Console.WriteLine("  ** Error occurred whilst parsing FBX - {0}", ex.Message);
+                    }
                 }
             }
 
