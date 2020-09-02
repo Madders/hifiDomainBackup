@@ -84,7 +84,6 @@ namespace hifiDomainBackup
 
                 if(assetLink.RelativePath.EndsWith(".fbx", true, null))
                 {
-                    Console.WriteLine("{0}", assetLink.DownloadPath);
                     try
                     {
                         ParseFbxTextures(localPath, GetPathFromUrl(assetLink.DownloadPath), Path.GetDirectoryName(localPath));
